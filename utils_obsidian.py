@@ -1,6 +1,8 @@
 import os
 import yaml
 import shutil
+import re
+
 
 def add_yaml_field_from_md(filepath, field,  type_value):
     with open(filepath, "r", encoding="utf-8") as f:
@@ -116,7 +118,7 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
         for d in dirnames:
             candidate = os.path.abspath(os.path.join(dirpath_abs, d))
             if candidate == dest_dir_abs:
-                print(f"Ignorer le sous-dossier de destination dans la descente: {candidate}")
+                # print(f"Ignorer le sous-dossier de destination dans la descente: {candidate}")
                 continue
             filtered.append(d)
         dirnames[:] = filtered
@@ -124,7 +126,7 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
         for filename in filenames:
             if not filename.lower().endswith(".md"):
                 # debug: extension non prise en compte
-                print(f"Ignoré (extension) : {os.path.join(dirpath_abs, filename)}")
+                # print(f"Ignoré (extension) : {os.path.join(dirpath_abs, filename)}")
                 continue
 
             full_path = os.path.join(dirpath_abs, filename)
@@ -135,11 +137,11 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
                 with open(full_path_abs, "r", encoding="utf-8") as f:
                     content = f.read()
             except Exception as e:
-                print(f"Erreur lecture {full_path_abs}: {e}")
+                # print(f"Erreur lecture {full_path_abs}: {e}")
                 continue
 
             if not content:
-                print(f"Ignoré (vide) : {full_path_abs}")
+                # print(f"Ignoré (vide) : {full_path_abs}")
                 continue
 
             if content.startswith("\ufeff"):
@@ -147,7 +149,7 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
 
             lines = content.splitlines(keepends=True)
             if len(lines) < 3 or lines[0].strip() != "---":
-                print(f"Ignoré (pas de header YAML) : {full_path_abs}")
+                # print(f"Ignoré (pas de header YAML) : {full_path_abs}")
                 continue
 
             # Extraction du bloc YAML
@@ -160,7 +162,7 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
             try:
                 header = yaml.safe_load("".join(yaml_lines)) or {}
             except yaml.YAMLError:
-                print(f"Ignoré (YAML invalide) : {full_path_abs}")
+                # print(f"Ignoré (YAML invalide) : {full_path_abs}")
                 continue
 
             if header.get(yaml_key) == yaml_value:
@@ -168,7 +170,7 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
 
                 # Ne rien faire si le fichier est déjà à la destination (même chemin)
                 if full_path_abs == dest_path_abs:
-                    print(f"Ignoré (déjà à la destination) : {full_path_abs}")
+                    # print(f"Ignoré (déjà à la destination) : {full_path_abs}")
                     continue
 
                 # Éviter écrasement : trouver un nom disponible
@@ -183,6 +185,73 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
                     print(f"Déplacement : {full_path_abs} → {final_dest}")
                     shutil.move(full_path_abs, final_dest)
                 except Exception as e:
-                    print(f"Échec déplacement {full_path_abs} → {final_dest}: {e}")
+                    continue
+                    # print(f"Échec déplacement {full_path_abs} → {final_dest}: {e}")
             else:
-                print(f"Ignoré (clé/valeur non correspondante) : {full_path_abs}")
+                continue
+                # print(f"Ignoré (clé/valeur non correspondante) : {full_path_abs}")
+
+
+def extract_done_tasks_from_file(filepath):
+    TASK_DONE_PATTERN = re.compile(r"^\s*(?:-|\d+\.)\s*\[x\]\s+.*", re.IGNORECASE)
+
+    done_tasks = []
+    remaining_lines = []
+
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            if TASK_DONE_PATTERN.match(line):
+                done_tasks.append(line.rstrip("\n"))
+            else:
+                remaining_lines.append(line)
+
+    return done_tasks, remaining_lines
+
+
+def ensure_header_exists(note_title, path_obs):
+    ARCHIVE_FILE = os.path.join(path_obs, "archives des taches.md")
+    """Retourne True si le header existe déjà dans l'archive."""
+    if not os.path.exists(ARCHIVE_FILE):
+        return False
+
+    with open(ARCHIVE_FILE, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    return f"# [[{note_title}]]" in content
+
+
+def append_tasks(note_title, tasks, path_obs):
+    ARCHIVE_FILE = os.path.join(path_obs, "archives des taches.md")
+    """Ajoute les tâches sous le header correspondant."""
+    if not tasks:
+        return
+
+    header_exists = ensure_header_exists(note_title, path_obs)
+
+    with open(ARCHIVE_FILE, "a", encoding="utf-8") as f:
+        if not header_exists:
+            f.write(f"\n# [[{note_title}]]\n")
+
+        for t in tasks:
+            f.write(t + "\n")
+
+
+def process_vault(path_obs):
+    for root, _, files in os.walk(path_obs):
+        for filename in files:
+            if not filename.endswith(".md"):
+                continue
+            if filename == "archives des taches.md":
+                continue
+
+            filepath = os.path.join(root, filename)
+            note_title = os.path.splitext(filename)[0]
+
+            done_tasks, remaining = extract_done_tasks_from_file(filepath)
+
+            if done_tasks:
+                print(f"→ {len(done_tasks)} tâche(s) trouvée(s) dans {filename}")
+                append_tasks(note_title, done_tasks, path_obs)
+
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.writelines(remaining)
