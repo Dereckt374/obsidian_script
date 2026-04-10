@@ -129,6 +129,11 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
                 # print(f"Ignoré (extension) : {os.path.join(dirpath_abs, filename)}")
                 continue
 
+            if filename.lower().startswith("template -"):
+                # Ignorer les fichiers template
+                # print(f"Ignoré (template) : {os.path.join(dirpath_abs, filename)}")
+                continue
+
             full_path = os.path.join(dirpath_abs, filename)
             full_path_abs = os.path.abspath(full_path)
 
