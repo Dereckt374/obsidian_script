@@ -3,7 +3,6 @@ import yaml
 import shutil
 import re
 
-
 def add_yaml_field_from_md(filepath, field,  type_value):
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
@@ -89,11 +88,6 @@ def process_markdown_file(filepath, field_name):
 
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(new_content)
-
-
-import os
-import shutil
-import yaml
 
 def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
     """
