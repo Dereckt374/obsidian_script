@@ -1,7 +1,9 @@
+from email import parser
 import os
 import yaml
 import shutil
 import re
+from datetime import datetime
 
 def add_yaml_field_from_md(filepath, field,  type_value):
     with open(filepath, "r", encoding="utf-8") as f:
@@ -136,7 +138,7 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
                 with open(full_path_abs, "r", encoding="utf-8") as f:
                     content = f.read()
             except Exception as e:
-                # print(f"Erreur lecture {full_path_abs}: {e}")
+                print(f"Erreur lecture {full_path_abs}: {e}")
                 continue
 
             if not content:
@@ -179,16 +181,15 @@ def move_md_by_yaml_header(root_dir, yaml_key, yaml_value, dest_dir):
                 while os.path.exists(final_dest):
                     final_dest = f"{base} ({i}){ext}"
                     i += 1
-
                 try:
                     print(f"Déplacement : {full_path_abs} → {final_dest}")
                     shutil.move(full_path_abs, final_dest)
                 except Exception as e:
+                    print(f"Échec déplacement {full_path_abs} → {final_dest}: {e}")
                     continue
-                    # print(f"Échec déplacement {full_path_abs} → {final_dest}: {e}")
             else:
-                continue
                 # print(f"Ignoré (clé/valeur non correspondante) : {full_path_abs}")
+                continue
 
 
 def extract_done_tasks_from_file(filepath):
@@ -254,3 +255,41 @@ def process_vault(path_obs):
 
                 with open(filepath, "w", encoding="utf-8") as f:
                     f.writelines(remaining)
+
+
+
+
+def create_zip_backup(source_dir, target_dir):
+    # Vérification des chemins
+    if not os.path.isdir(source_dir):
+        raise ValueError(f"Le répertoire source n'existe pas : {source_dir}")
+    if not os.path.isdir(target_dir):
+        raise ValueError(f"Le répertoire cible n'existe pas : {target_dir}")
+
+    # Horodatage
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    zip_name = f"backup_{timestamp}"
+    zip_path = os.path.join(target_dir, zip_name)
+
+    # Création du zip
+    shutil.make_archive(zip_path, 'zip', source_dir)
+
+    print(f"Backup ZIP créé : {zip_path}.zip")
+    return f"{zip_path}.zip"
+
+
+def rotate_backups(target_dir, keep):
+    if keep is None:
+        return  # Copies illimitées
+
+    # Liste des backups triés par date (du plus ancien au plus récent)
+    backups = sorted(
+        [f for f in os.listdir(target_dir) if f.startswith("backup_") and f.endswith(".zip")]
+    )
+
+    # Si trop de backups, on supprime les plus anciens
+    while len(backups) > keep:
+        old_backup = backups.pop(0)
+        old_path = os.path.join(target_dir, old_backup)
+        os.remove(old_path)
+        print(f"Backup supprimé (rotation) : {old_path}")

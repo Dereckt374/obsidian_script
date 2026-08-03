@@ -1,8 +1,9 @@
 from utils_obsidian import *
+import os
 
 OBS_PRO = r"C:\Users\virgil.mesle\OneDrive - Sirius Space Services\Documents\obsidian_pro"
-OBS_LOS = r"C:\Users\virgil.mesle\OneDrive - Sirius Space Services\Documents\LOS\obsidian_los"
-
+OBS_LOS = r"C:\Users\virgil.mesle\Sirius Space Services\Technique - 0000000-Systeme_de_lancement\0300000 - Loi spatiale\0320000 - Loi française\0321000 - LOS\obsidian_los"
+PATH_ARCHIVE_OBS_LOS = r"C:\Users\virgil.mesle\OneDrive - Sirius Space Services\Documents\98 - Archive\ARCHIVE - LOS OBSIDIAN"
 
 def main():
     move_md_by_yaml_header(
@@ -27,6 +28,8 @@ def main():
     )
 
     process_vault(OBS_PRO)
+
+    create_zip_backup(OBS_LOS, PATH_ARCHIVE_OBS_LOS)
 
 if __name__ == "__main__":
     main()
