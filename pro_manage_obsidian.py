@@ -29,7 +29,5 @@ def main():
 
     process_vault(OBS_PRO)
 
-    create_zip_backup(OBS_LOS, PATH_ARCHIVE_OBS_LOS)
-
 if __name__ == "__main__":
     main()
