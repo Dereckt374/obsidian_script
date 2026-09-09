@@ -4,9 +4,9 @@
 import os
 
 # ---------------- CONFIG ----------------
-ROOT = r"C:\Users\virgil.mesle\Documents\architecture-systeme\2.Functional\Functional Interfaces"
-OLD = "# Description"
-NEW = "# Flux"
+ROOT = r"C:\Users\virgil.mesle\Documents\architecture-systeme\2.Functional\Specifications func S1B"
+OLD = "tags: 'need_s1b'"
+NEW = "tags: 's1b_spec_func'"
 DRY_RUN = False                       # True = aperçu seul, aucune écriture
 EXCLUDE_DIRS = {".git", ".svn", "node_modules", "__pycache__", ".venv", "venv"}
 MAX_SIZE = 15 * 1024 * 1024           # ignore les fichiers > 5 Mo

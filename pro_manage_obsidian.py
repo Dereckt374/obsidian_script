@@ -1,4 +1,4 @@
-from utils_obsidian import *
+from gestion_yaml_notes.utils_obsidian import *
 import os
 
 OBS_PRO = r"C:\Users\virgil.mesle\OneDrive - Sirius Space Services\Documents\obsidian_pro"

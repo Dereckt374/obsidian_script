@@ -20,37 +20,17 @@ et `texte_a_inserer` en tête de script.
 """
 
 # Répertoire contenant les fichiers
-repertoire = Path(r"C:\Users\virgil.mesle\Documents\architecture-systeme\2.Functional\Spec_test")
+repertoire = Path(r"C:\Users\virgil.mesle\Documents\architecture-systeme\1.Operational\Needs")
 
 # Position d'insertion : "debut", "fin", "avant" ou "apres"
-mode = "fin"
+mode = "debut"
 
 # Chaîne cible (utilisée uniquement si mode == "avant" ou "apres")
-chaine_cible = """
-"""
+chaine_cible = """---"""
 
 # Texte à insérer
-texte_a_inserer = """
-# Rational
-
-# Childrens
-```base
-filters:
-  and:
-    - file.hasLink(this.file)
-    - not:
-        - this.file.hasLink(file.file)
-views:
-  - type: table
-    name: Tableau
-    filters:
-      and:
-        - '!file.name.startsWith("temp")'
-    groupBy:
-      property: tags
-      direction: ASC
-```
-"""
+texte_a_inserer = """---
+tags:"""
 
 for fichier in repertoire.iterdir():
     if not fichier.is_file():

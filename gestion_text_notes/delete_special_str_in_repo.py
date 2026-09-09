@@ -1,8 +1,10 @@
 from pathlib import Path
 
 # === CONFIGURATION ===
-REPERTOIRE = Path(r"C:\Users\virgil.mesle\OneDrive - Sirius Space Services\Documents\obsidian_system_analysis\2.Functionnal\Functions")
-CHAINE_A_SUPPRIMER = "../Functions/"
+REPERTOIRE = Path(r"C:\Users\virgil.mesle\Documents\architecture-systeme\1.Operational\Needs")
+
+CHAINE_A_SUPPRIMER = """---
+# tags:"""
 
 # Extensions considérées comme des notes
 EXTENSIONS = {".md"}
